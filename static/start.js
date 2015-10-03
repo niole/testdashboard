@@ -46,18 +46,14 @@ var data = [
             .range([0, width]);
 
   var yscale = d3.scale.linear()
-            .domain([Max(data, 'inches'), 0])
+            .domain([0,Max(data, 'inches')])
             .range([height, 0]);
 
-
-  var yscalexis= d3.scale.linear()
-            .domain([0,Max(data, 'inches')])
-            .range([0,height]);
 
   var xAxis = d3.svg.axis().scale(xscale)
       .orient("bottom").ticks(data.length);
 
-  var yAxis = d3.svg.axis().scale(yscalexis)
+  var yAxis = d3.svg.axis().scale(yscale)
       .orient("left").ticks(data.length);
 
 
