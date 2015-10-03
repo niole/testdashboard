@@ -9,6 +9,7 @@ function Max(array, key) {
       big = array[i][key];
     }
   }
+  console.log(big);
   return big;
 }
 
@@ -21,9 +22,19 @@ var data = [
   {i:3,date: "9/5/2015", inches: 0.9},
   {i:4,date: "9/6/2015", inches: 2.7},
   {i:5,date: "9/7/2015", inches:4.0},
-  {i:6,date: "9/8/2015", inches: 5.4}];
+  {i:6,date: "9/8/2015", inches: 5.4},
+  {i:7,date: "9/3/2015",inches: 2.7},
+  {i:8,date: "9/4/2015", inches: 1.1},
+  {i:9,date: "9/5/2015", inches: 0.9},
+  {i:10,date: "9/6/2015", inches: 2.7},
+  {i:11,date: "9/7/2015", inches:4.0},
+  {i:12,date: "9/8/2015", inches: 5.4},
+  {i:13,date: "9/3/2015",inches: 2.7},
+  {i:14,date: "9/4/2015", inches: 1.1}];
 
-  var bisectx = d3.bisector(function(d) { return d.i; }).left;
+
+
+  var bisectx = d3.bisector(function(d) { return d.i; }).right;
   var bisecty = d3.bisector(function(d) { return d.inches; }).left;
 
   var margin = {top: 30, right: 20, bottom: 30, left: 50},
@@ -38,25 +49,15 @@ var data = [
             .domain([Max(data, 'inches'), 0])
             .range([height, 0]);
 
-  var inverty = d3.scale.linear()
-            .domain([height, 0])
-            .range([Max(data, 'inches'), 0]);
 
-  var invertx = d3.scale.linear()
-            .domain([0, width])
-            .range([0, data.length]);
+  var yscalexis= d3.scale.linear()
+            .domain([0,Max(data, 'inches')])
+            .range([0,height]);
 
-
-  var xrange = d3.scale.linear()
-              .range([0, width]);
-
-  var yrange = d3.scale.linear()
-                 .range([height, 0]);
-
-  var xAxis = d3.svg.axis().scale(xrange)
+  var xAxis = d3.svg.axis().scale(xscale)
       .orient("bottom").ticks(data.length);
 
-  var yAxis = d3.svg.axis().scale(yrange)
+  var yAxis = d3.svg.axis().scale(yscalexis)
       .orient("left").ticks(data.length);
 
 
@@ -77,6 +78,10 @@ var data = [
   var focus = svgContainer.append("g")                                // **********
       .style("display", "none");
 
+  focus.append("text")
+      .attr("x", 9)
+      .attr("dy", ".35em");
+
    focus.append("circle")                                 // **********
           .transition().duration(500)
           .attr("class", "tooltip")                                // **********
@@ -89,9 +94,11 @@ var data = [
           .attr("height", height)
           .style("fill", "none")
           .style("pointer-events", "all")
-          .on("mouseover", function() {
+          .on("mouseover", function(d) {
             mousemove
-            focus.style("display", null); })
+            focus.style("display", null)
+                  .append('text',d.i);
+            })
           .on("mouseout", function() { focus.style("display", "none"); })
           .on("mousemove", mousemove);
 
@@ -99,27 +106,25 @@ var data = [
   var lineGraph = svgContainer.append("path")
                               .attr("d", lineFunction(data))
                               .attr("stroke", "blue")
-                              .attr("stroke-width", 2)
+                              .attr("stroke-width", 1)
                               .attr("transform",
                                   "translate(" + margin.left + "," + margin.top + ")")
                               .attr("fill", "none");
 
 
     function mousemove() {
-        var x1 = invertx(d3.mouse(this)[0]);
-        var i = bisecty(data, x1, 1);
+        var x0 = xscale.invert(d3.mouse(this)[0]);
+        console.log(x0);
+        var i = bisectx(data, x0, 1);
+        var d0 = data[i - 1];
         var d1 = data[i];
-        console.log('x1');
-        console.log(x1);
-        console.log('d1');
-        console.log(d1);
-        //find out if x is closer to i or i+1 and hightlight that data pt
-        focus.select("circle.tooltip")
-            .attr("transform",                             // **********
-                  "translate(" + (margin.left+xscale(d1.i)) + "," +         // **********
-                                 (yscale(d1.inches)+margin.top) + ")");        // **********
+        var d = x0 - d0.i > d1.i - x0 ? d1 : d0;
+        focus
+            .attr("transform",
+                  "translate(" + (margin.left+xscale(d.i)) + "," +
+                                 (yscale(d.inches)+margin.top) + ")");        // **********
+        focus.select("text").text(d.inches);
     }
-
 
    svgContainer.append("g")
         .attr("class", "x axis")
@@ -134,5 +139,11 @@ var data = [
               .attr("transform",
               "translate(" + margin.left + "," + margin.top + ")")
 
-        .call(yAxis);
+        .call(yAxis)
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("rainfall per day (in)");
 }
