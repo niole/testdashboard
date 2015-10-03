@@ -13,22 +13,23 @@ function Max(array, key) {
 }
 
 function makevis() {
+
   var data = [
-    {i: 0, date: "9/2/2015",inches: 6.6},
-    {i:1,date: "9/3/2015",inches: 2.7},
-    {i:2,date: "9/4/2015", inches: 1.1},
-    {i:3,date: "9/5/2015", inches: 0.9},
-    {i:4,date: "9/6/2015", inches: 2.7},
-    {i:5,date: "9/7/2015", inches:4.0},
-    {i:6,date: "9/8/2015", inches: 5.4},
-    {i:7,date: "9/3/2015",inches: 2.7},
-    {i:8,date: "9/4/2015", inches: 1.1},
-    {i:9,date: "9/5/2015", inches: 0.9},
-    {i:10,date: "9/6/2015", inches: 2.7},
-    {i:11,date: "9/7/2015", inches:4.0},
-    {i:12,date: "9/8/2015", inches: 5.4},
-    {i:13,date: "9/3/2015",inches: 2.7},
-    {i:14,date: "9/4/2015", inches: 1.1}];
+    {i: 0, date: "9/2",inches: 6.6},
+    {i:1,date: "9/3",inches: 2.7},
+    {i:2,date: "9/4", inches: 1.1},
+    {i:3,date: "9/5", inches: 0.9},
+    {i:4,date: "9/6", inches: 2.7},
+    {i:5,date: "9/7", inches:4.0},
+    {i:6,date: "9/8", inches: 5.4},
+    {i:7,date: "9/9",inches: 2.7},
+    {i:8,date: "9/10", inches: 1.1},
+    {i:9,date: "9/11", inches: 0.9},
+    {i:10,date: "9/12", inches: 2.7},
+    {i:11,date: "9/13", inches:4.0},
+    {i:12,date: "9/14", inches: 5.4},
+    {i:13,date: "9/15",inches: 2.7},
+    {i:14,date: "9/16", inches: 1.1}];
 
   var bisectx = d3.bisector(function(d) { return d.i; }).left;
 
@@ -44,11 +45,8 @@ function makevis() {
             .domain([0,Max(data, 'inches')])
             .range([height, 0]);
 
-  var xAxis = d3.svg.axis().scale(xscale)
-                .orient("bottom").ticks(data.length);
-
   var yAxis = d3.svg.axis().scale(yscale)
-      .orient("left").ticks(data.length);
+                    .orient("left").ticks(data.length);
 
   var svgContainer = d3.select('body').append('svg')
               .attr("width", width + margin.left + margin.right)
@@ -58,6 +56,7 @@ function makevis() {
                            .x(function(d) { return xscale(d.i); })
                            .y(function(d) { return yscale(d.inches); })
                            .interpolate("linear");
+
 
   var focus = svgContainer.append("g")
       .style("display", "none");
@@ -107,11 +106,25 @@ function makevis() {
         focus.select("text").text(d.inches);
     }
 
-   svgContainer.append("g")
-        .attr("class", "x axis")
-              .attr("transform",
-              "translate(" + margin.left + "," + (height + margin.top) + ")")
-        .call(xAxis);
+    var xtext = svgContainer.append("g")
+                  .attr("x", margin.left)
+                  .attr("y", margin.top+height)
+                  .attr("class", "xtext");
+
+    var text = xtext.selectAll("text")
+                 .data(data)
+                 .enter()
+                 .append("text");
+
+    text
+      .attr("x", function (d) { return xscale(d.i)+margin.left; })
+      .attr("y", function () { return margin.top+height; })
+      .attr("dy", ".35em")
+      .text(function(d) { 
+        if ((d.i%2) === 0) {
+          return d.date;
+        }
+       } );
 
     svgContainer.append("g")
         .attr("class", "y axis")
